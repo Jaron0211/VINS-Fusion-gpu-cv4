@@ -1,17 +1,15 @@
 # VINS-Fusion-gpu
-This repository change from 
+This repository change from https://github.com/pjrambo/VINS-Fusion-gpu, and change it compatible with OpenCV4.
 
 ## 1. Prerequisites  
 The essential software environment is same as VINS-Fusion. Besides, it requires OpenCV cuda version.(Only test it on OpenCV 4.5.5 with CUDA/CUDNN), and it have to rebuild the cv_bridge after install the OpenCV4 so that the OutOfMemoryError will not happend.
 ## 2. Usage
-### 2.1 Change the opencv path in the CMakeLists
+### 2.1 Change the opencv path in the CMakeLists(if your opencv is unable to find by the cmake).
 In /vins_estimator/CMakeLists.txt, change Line 20 to your path.  
 In /loop_fusion/CmakeLists.txt, change Line 19 to your path.
 
-
-
 ### 2.2 Change the acceleration parameters as you need.
-In the config file, there are two parameters for gpu acceleration.  
+In the config file, there are two parameters for gpu acceleration(if there's no use_gpu and use_gpu_acc_flow parameters in the config file, just manual add).  
 use_gpu: 0 for off, 1 for on  
 use_gpu_acc_flow:  0 for off, 1 for on  
 If your GPU resources is limitted or you want to use GPU for other computaion. You can set  
