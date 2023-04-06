@@ -28,6 +28,8 @@
 #include "../estimator/parameters.h"
 #include "../utility/tic_toc.h"
 
+#include <math.h>
+
 using namespace std;
 using namespace camodocal;
 using namespace Eigen;
@@ -52,7 +54,7 @@ public:
                                     map<int, cv::Point2f> &cur_id_pts, map<int, cv::Point2f> &prev_id_pts);
     void showTwoImage(const cv::Mat &img1, const cv::Mat &img2, 
                       vector<cv::Point2f> pts1, vector<cv::Point2f> pts2);
-    void drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight, 
+    cv::Mat drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight, 
                                    vector<int> &curLeftIds,
                                    vector<cv::Point2f> &curLeftPts, 
                                    vector<cv::Point2f> &curRightPts,
@@ -68,7 +70,7 @@ public:
     cv::Mat mask;
     cv::Mat fisheye_mask;
     cv::Mat prev_img, cur_img;
-    vector<cv::Point2f> n_pts;
+    vector<cv::Point2f> n_pts; //GFTT result points
     int sum_n;
     vector<cv::Point2f> predict_pts;
     vector<cv::Point2f> predict_pts_debug;

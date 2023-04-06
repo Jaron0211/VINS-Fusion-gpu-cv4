@@ -66,7 +66,7 @@ void Estimator::inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1)
     // }
     
     if(MULTIPLE_THREAD)  
-    {     
+    {      
         if(inputImageCnt % 2 == 0)
         {
             mBuf.lock();
@@ -316,11 +316,17 @@ void Estimator::processIMU(double t, double dt, const Vector3d &linear_accelerat
         gyr_0 = angular_velocity;
     }
 
+    //using frame_count is because, when the sliding window not reach full (default setting is 10 WINDOWS), the last one is not
+    // at the end of WINDOWS vector, so that here using the changing variable frame_count.
+
+    //anyway, pick the last one of the WINDOWS.
+
     if (!pre_integrations[frame_count])
     {
         pre_integrations[frame_count] = new IntegrationBase{acc_0, gyr_0, Bas[frame_count], Bgs[frame_count]};
     }
-    if (frame_count != 0)
+
+    if (frame_count != 0) 
     {
         pre_integrations[frame_count]->push_back(dt, linear_acceleration, angular_velocity);
         //if(solver_flag != NON_LINEAR)
@@ -331,11 +337,14 @@ void Estimator::processIMU(double t, double dt, const Vector3d &linear_accelerat
         angular_velocity_buf[frame_count].push_back(angular_velocity);
 
         int j = frame_count;         
-        Vector3d un_acc_0 = Rs[j] * (acc_0 - Bas[j]) - g;
-        Vector3d un_gyr = 0.5 * (gyr_0 + angular_velocity) - Bgs[j];
-        Rs[j] *= Utility::deltaQ(un_gyr * dt).toRotationMatrix();
-        Vector3d un_acc_1 = Rs[j] * (linear_acceleration - Bas[j]) - g;
+        Vector3d un_acc_0 = Rs[j] * (acc_0 - Bas[j]) - g; //rotation and remove g
+        Vector3d un_gyr = 0.5 * (gyr_0 + angular_velocity) - Bgs[j]; //g yro intergrate
+
+        Rs[j] *= Utility::deltaQ(un_gyr * dt).toRotationMatrix(); //rotate pose
+
+        Vector3d un_acc_1 = Rs[j] * (linear_acceleration - Bas[j]) - g; 
         Vector3d un_acc = 0.5 * (un_acc_0 + un_acc_1);
+
         Ps[j] += dt * Vs[j] + 0.5 * dt * dt * un_acc;
         Vs[j] += dt * un_acc;
     }
@@ -469,7 +478,7 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
     {
         TicToc t_solve;
         if(!USE_IMU)
-            f_manager.initFramePoseByPnP(frame_count, Ps, Rs, tic, ric);
+            f_manager.initFramePoseByPnP(frame_count, Ps, Rs, tic, ric); //work flag
         f_manager.triangulate(frame_count, Ps, Rs, tic, ric);
         optimization();
         set<int> removeIndex;
@@ -1310,7 +1319,7 @@ void Estimator::slideWindow()
                 delete it_0->second.pre_integration;
                 all_image_frame.erase(all_image_frame.begin(), it_0);
             }
-            slideWindowOld();
+            slideWindowOld(); 
         }
     }
     else

@@ -20,6 +20,7 @@
 #include "estimator/estimator.h"
 #include "estimator/parameters.h"
 #include "utility/visualization.h"
+#include "enhancer/enhancer.h"
 
 Estimator estimator;
 
@@ -68,7 +69,7 @@ cv::Mat getImageFromMsg(const sensor_msgs::ImageConstPtr &img_msg)
 }
 
 // extract images with same timestamp from two topics
-void sync_process()
+void sync_process_bak()
 {
     while(1)
     {
@@ -130,6 +131,74 @@ void sync_process()
     }
 }
 
+void sync_process()
+{
+    while(1)
+    {
+        if(STEREO)
+        {
+            cv::Mat image0, image1;
+            std_msgs::Header header;
+            double time = 0;
+            m_buf.lock();
+            if (!img0_buf.empty() && !img1_buf.empty())
+            {
+                double time0 = img0_buf.front()->header.stamp.toSec();
+                double time1 = img1_buf.front()->header.stamp.toSec();
+                if(time0 < time1)
+                {
+                    img0_buf.pop();
+                    printf("throw img0\n");
+                }
+                else if(time0 > time1)
+                {
+                    img1_buf.pop();
+                    printf("throw img1\n");
+                }
+                else
+                {
+                    time = img0_buf.front()->header.stamp.toSec();
+                    header = img0_buf.front()->header;
+                    image0 = getImageFromMsg(img0_buf.front());
+                    img0_buf.pop();
+                    image1 = getImageFromMsg(img1_buf.front());
+                    img1_buf.pop();
+                    //printf("find img0 and img1\n");
+                }
+            }
+            m_buf.unlock();
+
+            if(!image0.empty()){
+                pair<cv::Mat,cv::Mat> image_pair;
+                image_pair = adaptive_correction_stereo(image0, image1);
+                image0 = image_pair.first;
+                image1 = image_pair.second;
+                estimator.inputImage(time, image0, image1);
+            }
+        }
+        else
+        {
+            cv::Mat image;
+            std_msgs::Header header;
+            double time = 0;
+            m_buf.lock();
+            if(!img0_buf.empty())
+            {
+                time = img0_buf.front()->header.stamp.toSec();
+                header = img0_buf.front()->header;
+                image = getImageFromMsg(img0_buf.front());
+                img0_buf.pop();
+            }
+            m_buf.unlock();
+            if(!image.empty())
+                image = adaptive_correction_mono(image);
+                estimator.inputImage(time, image);
+        }
+
+        std::chrono::milliseconds dura(2);
+        std::this_thread::sleep_for(dura);
+    }
+}
 
 void imu_callback(const sensor_msgs::ImuConstPtr &imu_msg)
 {

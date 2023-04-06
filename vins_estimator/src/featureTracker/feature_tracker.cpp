@@ -11,6 +11,8 @@
 
 #include "feature_tracker.h"
 #include<opencv2/imgproc/types_c.h>
+#include<opencv2/opencv.hpp>
+
 
 bool FeatureTracker::inBorder(const cv::Point2f &pt)
 {
@@ -111,15 +113,17 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
     row = cur_img.rows;
     col = cur_img.cols;
     cv::Mat rightImg = _img1;
-    /*
-    {
-        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
-        clahe->apply(cur_img, cur_img);
-        if(!rightImg.empty())
-            clahe->apply(rightImg, rightImg);
-    }
-    */
-    cur_pts.clear();
+    cv::Mat tracking_img;
+    
+    // Image enhance could be add in here
+    // {
+    //     cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
+    //     clahe->apply(cur_img, cur_img);
+    //     if(!rightImg.empty())
+    //         clahe->apply(rightImg, rightImg);
+    // }
+    
+    cur_pts.clear(); //clean the cur_pts buffer
 
     if (prev_pts.size() > 0)
     {
@@ -182,11 +186,11 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 d_pyrLK_sparse->calc(prev_gpu_img, cur_gpu_img, prev_gpu_pts, cur_gpu_pts, gpu_status);
                 
                 vector<cv::Point2f> tmp_cur_pts(cur_gpu_pts.cols);
-                cur_gpu_pts.download(tmp_cur_pts);
+                cur_gpu_pts.download(tmp_cur_pts); //Download the data from gpu to host
                 cur_pts = tmp_cur_pts;
 
                 vector<uchar> tmp_status(gpu_status.cols);
-                gpu_status.download(tmp_status);
+                gpu_status.download(tmp_status);   //Download the data from gpu to host
                 status = tmp_status;
 
                 int succ_num = 0;
@@ -224,6 +228,7 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 gpu_status.download(tmp1_status);
                 status = tmp1_status;
             }
+
             if(FLOW_BACK)
             {
                 cv::cuda::GpuMat reverse_gpu_status;
@@ -232,15 +237,17 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 cv::Size(21, 21), 1, 30, true);
                 d_pyrLK_sparse->calc(cur_gpu_img, prev_gpu_img, cur_gpu_pts, reverse_gpu_pts, reverse_gpu_status);
 
-                vector<cv::Point2f> reverse_pts(reverse_gpu_pts.cols);
+                //vector<cv::Point2f> reverse_pts(reverse_gpu_pts.cols);
+                vector<cv::Point2f> reverse_pts;
                 reverse_gpu_pts.download(reverse_pts);
 
-                vector<uchar> reverse_status(reverse_gpu_status.cols);
+                //vector<uchar> reverse_status(reverse_gpu_status.cols);
+                vector<uchar> reverse_status;
                 reverse_gpu_status.download(reverse_status);
 
                 for(size_t i = 0; i < status.size(); i++)
                 {
-                    if(status[i] && reverse_status[i] && distance(prev_pts[i], reverse_pts[i]) <= 0.5)
+                    if(status[i] && reverse_status[i] && distance(prev_pts[i], reverse_pts[i]) <= 0.5) //How the .5 come?
                     {
                         status[i] = 1;
                     }
@@ -330,7 +337,7 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
 
         ROS_DEBUG("add feature begins");
         TicToc t_a;
-        addPoints();
+        addPoints(); 
         // ROS_DEBUG("selectFeature costs: %fms", t_a.toc());
         // printf("selectFeature costs: %fms\n", t_a.toc());
     }
@@ -377,17 +384,23 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 cv::cuda::GpuMat cur_gpu_img(cur_img);
                 cv::cuda::GpuMat right_gpu_Img(rightImg);
                 cv::cuda::GpuMat cur_gpu_pts(cur_pts);
+
                 cv::cuda::GpuMat cur_right_gpu_pts;
                 cv::cuda::GpuMat gpu_status;
+
                 cv::Ptr<cv::cuda::SparsePyrLKOpticalFlow> d_pyrLK_sparse = cv::cuda::SparsePyrLKOpticalFlow::create(
                 cv::Size(21, 21), 3, 30, false);
+
                 d_pyrLK_sparse->calc(cur_gpu_img, right_gpu_Img, cur_gpu_pts, cur_right_gpu_pts, gpu_status);
 
-                vector<cv::Point2f> tmp_cur_right_pts(cur_right_gpu_pts.cols);
+                //vector<cv::Point2f> tmp_cur_right_pts(cur_right_gpu_pts.cols);
+                vector<cv::Point2f> tmp_cur_right_pts ;
+
                 cur_right_gpu_pts.download(tmp_cur_right_pts);
                 cur_right_pts = tmp_cur_right_pts;
 
-                vector<uchar> tmp_status(gpu_status.cols);
+                //vector<uchar> tmp_status(gpu_status.cols);
+                vector<uchar> tmp_status;
                 gpu_status.download(tmp_status);
                 status = tmp_status;
 
@@ -420,21 +433,24 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
             reduceVector(cur_right_pts, status);
             reduceVector(ids_right, status);
             // only keep left-right pts
-            /*
-            reduceVector(cur_pts, status);
-            reduceVector(ids, status);
-            reduceVector(track_cnt, status);
-            reduceVector(cur_un_pts, status);
-            reduceVector(pts_velocity, status);
-            */
+            
+            // reduceVector(cur_pts, status);
+            // reduceVector(ids, status);
+            // reduceVector(track_cnt, status);
+            // reduceVector(cur_un_pts, status);
+            // reduceVector(pts_velocity, status);
+            
             cur_un_right_pts = undistortedPts(cur_right_pts, m_camera[1]);
             right_pts_velocity = ptsVelocity(ids_right, cur_un_right_pts, cur_un_right_pts_map, prev_un_right_pts_map);
             
         }
         prev_un_right_pts_map = cur_un_right_pts_map;
     }
-    if(SHOW_TRACK)
-        drawTrack(cur_img, rightImg, ids, cur_pts, cur_right_pts, prevLeftPtsMap);
+    if(SHOW_TRACK){
+        tracking_img = drawTrack(cur_img, rightImg, ids, cur_pts, cur_right_pts, prevLeftPtsMap);
+        cv::imshow("tracking_img",tracking_img);
+        cv::waitKey(1);
+    }
 
     prev_img = cur_img;
     prev_pts = cur_pts;
@@ -574,7 +590,7 @@ void FeatureTracker::showUndistortion(const string &name)
         }
     }
     cv::imshow(name, undistortedImg);
-    cv::waitKey(0);
+    cv::waitKey(1);
 }
 
 vector<cv::Point2f> FeatureTracker::undistortedPts(vector<cv::Point2f> &pts, camodocal::CameraPtr cam)
@@ -630,7 +646,7 @@ vector<cv::Point2f> FeatureTracker::ptsVelocity(vector<int> &ids, vector<cv::Poi
     return pts_velocity;
 }
 
-void FeatureTracker::drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight, 
+cv::Mat FeatureTracker::drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight, 
                                vector<int> &curLeftIds,
                                vector<cv::Point2f> &curLeftPts, 
                                vector<cv::Point2f> &curRightPts,
@@ -665,28 +681,35 @@ void FeatureTracker::drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight,
     for (size_t i = 0; i < curLeftIds.size(); i++)
     {
         int id = curLeftIds[i];
-        mapIt = prevLeftPtsMap.find(id);
+        mapIt = prevLeftPtsMap.find(id); //find same id 
         if(mapIt != prevLeftPtsMap.end())
         {
-            cv::arrowedLine(imTrack, curLeftPts[i], mapIt->second, cv::Scalar(0, 255, 0), 1, 8, 0, 0.2);
+            cv::Point2f cur_pt = curLeftPts[i];
+            cv::Point2f prv_pt = mapIt->second;
+            float vec_dy = cur_pt.y - prv_pt.y ;
+            float vec_dx = cur_pt.x - prv_pt.x ;
+            float color_alpha = atan2(vec_dy,vec_dx)*180 /3.14159 + 180;
+
+            cv::arrowedLine(imTrack, curLeftPts[i], mapIt->second, cv::Scalar(255 , 0 , 255), 2, 8, 0, 0.5);
         }
     }
 
     //draw prediction
-    /*
+    
     for(size_t i = 0; i < predict_pts_debug.size(); i++)
     {
         cv::circle(imTrack, predict_pts_debug[i], 2, cv::Scalar(0, 170, 255), 2);
     }
-    */
+    
     //printf("predict pts size %d \n", (int)predict_pts_debug.size());
 
 
     //cv::Mat imCur2Compress;
     //cv::resize(imCur2, imCur2Compress, cv::Size(cols, rows / 2));
 
-    cv::imshow("tracking", imTrack);
-    cv::waitKey(2);
+    //cv::imshow("tracking", imTrack);
+    //cv::waitKey(1);
+    return imTrack;
 }
 
 
