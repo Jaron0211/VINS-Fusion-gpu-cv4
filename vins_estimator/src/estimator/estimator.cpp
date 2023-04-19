@@ -223,7 +223,7 @@ void Estimator::processMeasurements()
         if (! MULTIPLE_THREAD)
             break;
 
-        std::chrono::milliseconds dura(2);
+        std::chrono::milliseconds dura(0);
         std::this_thread::sleep_for(dura);
     }
 }

@@ -35,7 +35,7 @@ double TD;
 int NUM_OF_CAM;
 int STEREO;
 int USE_IMU;
-int MULTIPLE_THREAD;
+bool MULTIPLE_THREAD;
 int USE_GPU;
 int USE_GPU_ACC_FLOW;
 int PUB_RECTIFY;
@@ -92,7 +92,8 @@ void readParameters(std::string config_file)
     SHOW_TRACK = fsSettings["show_track"];
     FLOW_BACK = fsSettings["flow_back"];
 
-    MULTIPLE_THREAD = fsSettings["multiple_thread"];
+    int MULTIPLE_THREAD_INT = fsSettings["multiple_thread"];
+    MULTIPLE_THREAD = bool(MULTIPLE_THREAD_INT);
 
     USE_GPU = fsSettings["use_gpu"];
     USE_GPU_ACC_FLOW = fsSettings["use_gpu_acc_flow"];

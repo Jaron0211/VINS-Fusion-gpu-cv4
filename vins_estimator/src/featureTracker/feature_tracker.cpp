@@ -142,8 +142,9 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 int succ_num = 0;
                 for (size_t i = 0; i < status.size(); i++)
                 {
-                    if (status[i])
-                        succ_num++;
+                    //if (status[i])
+                        //succ_num++;
+                    succ_num += status[i];
                 }
                 if (succ_num < 10)
                 cv::calcOpticalFlowPyrLK(prev_img, cur_img, prev_pts, cur_pts, status, err, cv::Size(21, 21), 3);
@@ -186,12 +187,14 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 d_pyrLK_sparse->calc(prev_gpu_img, cur_gpu_img, prev_gpu_pts, cur_gpu_pts, gpu_status);
                 
                 vector<cv::Point2f> tmp_cur_pts(cur_gpu_pts.cols);
-                cur_gpu_pts.download(tmp_cur_pts); //Download the data from gpu to host
-                cur_pts = tmp_cur_pts;
-
+                //cur_gpu_pts.download(tmp_cur_pts); //Download the data from gpu to host
+                //cur_pts = tmp_cur_pts;
+                cur_gpu_pts.download(cur_pts);
+                
                 vector<uchar> tmp_status(gpu_status.cols);
-                gpu_status.download(tmp_status);   //Download the data from gpu to host
-                status = tmp_status;
+                //gpu_status.download(tmp_status);   //Download the data from gpu to host
+                //status = tmp_status;
+                gpu_status.download(status);
 
                 int succ_num = 0;
                 for (size_t i = 0; i < tmp_status.size(); i++)
@@ -206,12 +209,14 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                     d_pyrLK_sparse->calc(prev_gpu_img, cur_gpu_img, prev_gpu_pts, cur_gpu_pts, gpu_status);
 
                     vector<cv::Point2f> tmp1_cur_pts(cur_gpu_pts.cols);
-                    cur_gpu_pts.download(tmp1_cur_pts);
-                    cur_pts = tmp1_cur_pts;
+                    //cur_gpu_pts.download(tmp1_cur_pts);
+                    //cur_pts = tmp1_cur_pts;
+                    cur_gpu_pts.download(cur_pts);
 
                     vector<uchar> tmp1_status(gpu_status.cols);
-                    gpu_status.download(tmp1_status);
-                    status = tmp1_status;
+                    //gpu_status.download(tmp1_status);
+                    //status = tmp1_status;
+                    gpu_status.download(status);
                 }
             }
             else
@@ -221,12 +226,14 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 d_pyrLK_sparse->calc(prev_gpu_img, cur_gpu_img, prev_gpu_pts, cur_gpu_pts, gpu_status);
 
                 vector<cv::Point2f> tmp1_cur_pts(cur_gpu_pts.cols);
-                cur_gpu_pts.download(tmp1_cur_pts);
-                cur_pts = tmp1_cur_pts;
+                //cur_gpu_pts.download(tmp1_cur_pts);
+                //cur_pts = tmp1_cur_pts;
+                cur_gpu_pts.download(cur_pts);
 
                 vector<uchar> tmp1_status(gpu_status.cols);
-                gpu_status.download(tmp1_status);
-                status = tmp1_status;
+                //gpu_status.download(tmp1_status);
+                //status = tmp1_status;
+                gpu_status.download(status);
             }
 
             if(FLOW_BACK)
@@ -247,7 +254,7 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
 
                 for(size_t i = 0; i < status.size(); i++)
                 {
-                    if(status[i] && reverse_status[i] && distance(prev_pts[i], reverse_pts[i]) <= 0.5) //How the .5 come?
+                    if(status[i] && reverse_status[i] && distance(prev_pts[i], reverse_pts[i]) <= 0.1) //How the .5 come?
                     {
                         status[i] = 1;
                     }
