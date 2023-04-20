@@ -515,9 +515,8 @@ CameraCalibration::optimize(CameraPtr& camera,
 
     std::cout << "begin ceres" << std::endl;
     ceres::Solver::Options options;
-    
     options.max_num_iterations = 1000;
-    options.num_threads = 6;
+    options.num_threads = 1;
 
     if (m_verbose)
     {
