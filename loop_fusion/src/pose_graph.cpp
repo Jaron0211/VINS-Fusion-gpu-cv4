@@ -462,6 +462,7 @@ void PoseGraph::optimize4DoF()
 
             ceres::Problem problem;
             ceres::Solver::Options options;
+            options.num_threads = 6;
             options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
             //options.minimizer_progress_to_stdout = true;
             //options.max_solver_time_in_seconds = SOLVER_TIME * 3;
@@ -641,6 +642,7 @@ void PoseGraph::optimize6DoF()
 
             ceres::Problem problem;
             ceres::Solver::Options options;
+            options.num_threads = 6;
             options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
             //ptions.minimizer_progress_to_stdout = true;
             //options.max_solver_time_in_seconds = SOLVER_TIME * 3;
