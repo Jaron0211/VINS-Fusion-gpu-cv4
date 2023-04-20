@@ -12,7 +12,8 @@
 #include "feature_tracker.h"
 #include<opencv2/imgproc/types_c.h>
 #include<opencv2/opencv.hpp>
-
+#include <cv_bridge/cv_bridge.h>
+#include "../utility/visualization.h"
 
 bool FeatureTracker::inBorder(const cv::Point2f &pt)
 {
@@ -454,9 +455,19 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
         prev_un_right_pts_map = cur_un_right_pts_map;
     }
     if(SHOW_TRACK){
+        using namespace ros;
+        double time_stamp;
+
         tracking_img = drawTrack(cur_img, rightImg, ids, cur_pts, cur_right_pts, prevLeftPtsMap);
-        cv::imshow("tracking_img",tracking_img);
-        cv::waitKey(1);
+
+        cv::Mat pub_track_img;
+        cv::resize(tracking_img, pub_track_img, cv::Size(tracking_img.cols / 2, tracking_img.rows / 2));
+        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", pub_track_img).toImageMsg();
+        msg->header.stamp = ros::Time(time_stamp);
+        pub_vins_imshow.publish(msg);
+
+        //cv::imshowtracking_img,"tracking_img");
+        //cv::waitKey(1);
     }
 
     prev_img = cur_img;
