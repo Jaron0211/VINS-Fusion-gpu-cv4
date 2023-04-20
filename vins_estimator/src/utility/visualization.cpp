@@ -26,6 +26,8 @@ ros::Publisher pub_keyframe_pose;
 ros::Publisher pub_keyframe_point;
 ros::Publisher pub_extrinsic;
 
+ros::Publisher pub_vins_imshow;
+
 CameraPoseVisualization cameraposevisual(1, 0, 0, 1);
 static double sum_of_path = 0;
 static Vector3d last_path(0.0, 0.0, 0.0);
