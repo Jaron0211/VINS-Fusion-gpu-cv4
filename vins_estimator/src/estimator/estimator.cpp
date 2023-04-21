@@ -161,6 +161,7 @@ void Estimator::processMeasurements()
         TicToc t_process;
         pair<double, map<int, vector<pair<int, Eigen::Matrix<double, 7, 1> > > > > feature;
         vector<pair<double, Eigen::Vector3d>> accVector, gyrVector;
+
         if(!featureBuf.empty())
         {
             feature = featureBuf.front();
@@ -174,16 +175,21 @@ void Estimator::processMeasurements()
                     printf("wait for imu ... \n");
                     if (! MULTIPLE_THREAD)
                         return;
-                    std::chrono::milliseconds dura(5);
+                    std::chrono::milliseconds dura(1);
                     std::this_thread::sleep_for(dura);
                 }
             }
+            printf("IMU process: %f\n", t_process.toc());
+            t_process.tic();
+            
             mBuf.lock();
             if(USE_IMU)
                 getIMUInterval(prevTime, curTime, accVector, gyrVector);
 
             featureBuf.pop();
             mBuf.unlock();
+            printf("IMUInterval time: %f\n", t_process.toc());
+            t_process.tic();
 
             if(USE_IMU)
             {
@@ -201,9 +207,13 @@ void Estimator::processMeasurements()
                     processIMU(accVector[i].first, dt, accVector[i].second, gyrVector[i].second);
                 }
             }
+            printf("processIMU time: %f\n", t_process.toc());
+            t_process.tic();
 
             processImage(feature.second, feature.first);
             prevTime = curTime;
+            printf("processImage time: %f\n", t_process.toc());
+            t_process.tic();
 
             printStatistics(*this, 0);
 
@@ -217,7 +227,8 @@ void Estimator::processMeasurements()
             pubPointCloud(*this, header);
             pubKeyframe(*this);
             pubTF(*this, header);
-            printf("process measurement time: %f\n", t_process.toc());
+            printf("pub time: %f\n", t_process.toc());
+            printf("-----------------------------------------\n");
         }
 
         if (! MULTIPLE_THREAD)
@@ -359,7 +370,7 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
     if (f_manager.addFeatureCheckParallax(frame_count, image, td))
     {
         marginalization_flag = MARGIN_OLD;
-        //printf("keyframe\n");
+        printf("keyframe\n");
     }
     else
     {
@@ -1053,7 +1064,7 @@ void Estimator::optimization()
     ceres::Solver::Options options;
 
     options.linear_solver_type = ceres::DENSE_SCHUR;
-    options.num_threads = 2;
+    options.num_threads = 4;
     options.trust_region_strategy_type = ceres::DOGLEG;
     options.max_num_iterations = NUM_ITERATIONS;
     //options.use_explicit_schur_complement = true;

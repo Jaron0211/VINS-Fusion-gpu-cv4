@@ -6,6 +6,8 @@ set(CMAKE_CXX_FLAGS "-std=c++11")
 #-DEIGEN_USE_MKL_ALL")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
 
+find_package(benchmark REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     std_msgs
@@ -61,7 +63,7 @@ target_link_libraries(vins_lib ${OpenCV_LIBS} ${catkin_LIBRARIES}  ${CERES_LIBRA
 
 
 add_executable(vins_node src/rosNodeTest.cpp)
-target_link_libraries(vins_node vins_lib) 
+target_link_libraries(vins_node vins_lib benchmark::benchmark) 
 
 add_executable(kitti_odom_test src/KITTIOdomTest.cpp)
 target_link_libraries(kitti_odom_test vins_lib) 
