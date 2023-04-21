@@ -20,8 +20,6 @@
 #include "estimator/parameters.h"
 #include "utility/visualization.h"
 
-#include <benchmark/benchmark.h>
-
 Estimator estimator;
 
 queue<sensor_msgs::ImuConstPtr> imu_buf;
