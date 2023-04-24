@@ -461,13 +461,12 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
         tracking_img = drawTrack(cur_img, rightImg, ids, cur_pts, cur_right_pts, prevLeftPtsMap);
 
         cv::Mat pub_track_img;
-        cv::resize(tracking_img, pub_track_img, cv::Size(tracking_img.cols / 2, tracking_img.rows / 2));
+        int default_rols = 480;
+        cv::resize(tracking_img, pub_track_img, cv::Size(default_rols * (tracking_img.cols/tracking_img.rows), default_rols));
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", pub_track_img).toImageMsg();
         msg->header.stamp = ros::Time(time_stamp);
         pub_vins_imshow.publish(msg);
 
-        //cv::imshowtracking_img,"tracking_img");
-        //cv::waitKey(1);
     }
 
     prev_img = cur_img;
