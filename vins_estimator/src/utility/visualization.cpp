@@ -36,7 +36,7 @@ size_t pub_counter = 0;
 
 void registerPub(ros::NodeHandle &n)
 {
-    pub_vins_imshow = n.advertise<sensor_msgs::Image>("track_img", 1000);
+    pub_vins_imshow = n.advertise<sensor_msgs::Image>("track_img", 1);
     pub_latest_odometry = n.advertise<nav_msgs::Odometry>("imu_propagate", 1000);
     pub_path = n.advertise<nav_msgs::Path>("path", 1000);
     pub_odometry = n.advertise<nav_msgs::Odometry>("odometry", 1000);
