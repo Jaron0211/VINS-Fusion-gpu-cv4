@@ -128,7 +128,7 @@ void sync_process()
                 estimator.inputImage(time, image);
         }
 
-        std::chrono::milliseconds dura(2);
+        std::chrono::milliseconds dura(0);
         std::this_thread::sleep_for(dura);
     }
 }

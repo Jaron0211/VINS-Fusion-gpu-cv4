@@ -370,7 +370,7 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
     if (f_manager.addFeatureCheckParallax(frame_count, image, td))
     {
         marginalization_flag = MARGIN_OLD;
-        printf("keyframe\n");
+        //printf("keyframe\n");
     }
     else
     {
