@@ -1,5 +1,5 @@
 # VINS-Fusion-gpu
-This repository change from https://github.com/pjrambo/VINS-Fusion-gpu, and change it compatible with OpenCV4.
+This repository forked from https://github.com/pjrambo/VINS-Fusion-gpu, and change it compatible with OpenCV4.
 
 2023/04/20:
 In some case, the if(MULTIPLE_THREAD) regonize the variable as INT not BOOL, so the multi-thread for processMeasurement() not work properly, i change the MULTIPLE_THREAD from INT to BOOL than fix the problem. 
