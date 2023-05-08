@@ -2,7 +2,7 @@
 This repository forked from https://github.com/pjrambo/VINS-Fusion-gpu, and change it compatible with OpenCV4.
 
 2023/04/20:
-In some case, the if(MULTIPLE_THREAD) regonize the variable as INT not BOOL, so the multi-thread for processMeasurement() not work properly, i change the MULTIPLE_THREAD from INT to BOOL than fix the problem. 
+In some case, the if(MULTIPLE_THREAD) regonize the variable as INT not BOOL, so the multi-thread for processMeasurement() not work properly, I change the MULTIPLE_THREAD from INT to BOOL than fix the problem. 
 
 ## 1. Prerequisites  
 The essential software environment is same as VINS-Fusion. Besides, it requires OpenCV cuda version.(Only test it on OpenCV 4.5.5 with CUDA/CUDNN), and it have to rebuild the cv_bridge after install the OpenCV4 so that the OutOfMemoryError will not happend.
