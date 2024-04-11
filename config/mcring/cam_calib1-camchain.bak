@@ -1,0 +1,26 @@
+cam0:
+  cam_overlaps: []
+  camera_model: pinhole
+  distortion_coeffs: [-0.4802055804057313, -0.49722790307564535, -0.012705031537627677, -0.0027329602391628384]
+  distortion_model: radtan
+  intrinsics: [1840.2581019551449, 1854.554000860143, 945.0999371609562, 644.6314144622746]
+  resolution: [1920, 1280]
+  rostopic: /cam
+  
+  
+%YAML:1.0
+---
+model_type: PINHOLE
+camera_name: camera
+image_width: 1920
+image_height: 1280
+distortion_parameters:
+   k1: -0.4802055804057313
+   k2: -0.49722790307564535
+   p1: -0.012705031537627677
+   p2: -0.0027329602391628384
+projection_parameters:
+   fx: 1840.2581019551449
+   fy: 1854.554000860143
+   cx: 945.0999371609562
+   cy: 644.6314144622746
