@@ -8,7 +8,7 @@ num_of_cam: 2
 imu_topic: "/imu0"
 image0_topic: "/cam0/image_raw"
 image1_topic: "/cam1/image_raw"
-output_path: "/home/jaron/vins_output/"
+output_path: "/home/jaron/output/"
 
 cam0_calib: "cam0_mei.yaml"
 cam1_calib: "cam1_mei.yaml"
@@ -44,8 +44,8 @@ use_gpu: 1
 use_gpu_acc_flow: 1
 
 #feature traker paprameters
-max_cnt: 100           # max feature number in feature tracking
-min_dist: 10            # min distance between two features 
+max_cnt: 120           # max feature number in feature tracking
+min_dist: 30            # min distance between two features 
 freq: 0                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
 F_threshold: 1.0        # ransac threshold (pixel)
 show_track: 1           # publish tracking image as topic

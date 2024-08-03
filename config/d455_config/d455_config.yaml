@@ -3,7 +3,7 @@
 #common parameters
 #support: 1 imu 1 cam; 1 imu 2 cam: 2 cam; 
 imu: 1
-num_of_cam: 1 
+num_of_cam: 2 
 
 imu_topic: "/camera/imu"
 image0_topic: "/camera/infra1/image_rect_raw"
@@ -43,17 +43,17 @@ body_T_cam1: !!opencv-matrix
        9.9996562395952970e-01, 1.4792975611420579e-02, 0., 0., 0., 1. ]
 
 #Multiple thread support
-multiple_thread: 0
+multiple_thread: 1
 
 #Gpu accleration support
-use_gpu: 0
-use_gpu_acc_flow: 0
+use_gpu: 1
+use_gpu_acc_flow: 1
 
 #feature traker paprameters
-max_cnt: 80           # max feature number in feature tracking
-min_dist: 10            # min distance between two features
-freq: 10              # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
-max_depth: 15.0         # max estimated depth (m)
+max_cnt: 120           # max feature number in feature tracking
+min_dist: 20            # min distance between two features
+freq: 0              # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
+max_depth: 30.0         # max estimated depth (m)
 F_threshold: 1.0        # ransac threshold (pixel)
 show_track: 1
 flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
